@@ -1,24 +1,56 @@
 package com.example.interviewcoding
 
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.reactivex.Observable
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.ClassRule
+import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito
-import org.junit.Assert.*
-import org.mockito.Mockito.`when`
+import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
+import org.mockito.Mock
+import org.mockito.Mockito.*
+import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnitRunner
 
 
+@RunWith(MockitoJUnitRunner::class)
 class PresenterMainActivityTest {
+    @Rule
+    @JvmField
+    var rule = InstantTaskExecutorRule()
+
+    companion object {
+        @ClassRule
+        @JvmField
+        val schedulers = RxImmediateSchedulerRule()
+    }
+    @Mock
+    private lateinit var contract: Contract.ViewContract
+    @Mock
+    private lateinit var postsService: PostsService
+
+    private lateinit var presenter: PresenterMainActivity
+
+    @Before
+    fun setUp() {
+        MockitoAnnotations.initMocks(this)
+        presenter = PresenterMainActivity(contract, postsService)
+    }
 
     @Test
     fun testGetPosts() {
-        val postsService = Mockito.mock(PostsService::class.java)
         `when`(postsService.getPosts()).thenReturn(Observable.just(testResults()))
+
+        presenter.getPosts()
 
         var actualResult = listOf<Post>()
         postsService.getPosts().subscribe { result ->
             actualResult = result
         }
 
+        verify(contract).updateUI(ArgumentMatchers.anyList())
         assertEquals(actualResult, testResults())
     }
 

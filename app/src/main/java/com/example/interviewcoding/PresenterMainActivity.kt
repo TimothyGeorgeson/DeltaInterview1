@@ -1,17 +1,14 @@
 package com.example.interviewcoding
 
+import android.annotation.SuppressLint
 import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
-class PresenterMainActivity(private val contract : Contract.ViewContract): Contract.PresenterContract {
+class PresenterMainActivity(private val contract : Contract.ViewContract, private val postsService: PostsService): Contract.PresenterContract {
 
+    @SuppressLint("CheckResult")
     override fun getPosts() {
-        val retrofit = RetrofitClientInstance.getRetrofitInstance()
-
-        retrofit?.let {retrofitInstance ->
-            val postsService = retrofitInstance.create(PostsService::class.java)
-
             postsService.getPosts()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -25,5 +22,3 @@ class PresenterMainActivity(private val contract : Contract.ViewContract): Contr
                 }, {Log.e("TAG", it.message)})
         }
     }
-
-}
